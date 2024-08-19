@@ -217,30 +217,39 @@
     <script>
         $(function() {
             $('.add-to-cart').click(function(e) {
-                id_member = {{ Auth::guard('webmember')->user()->id }}
-                id_barang = {{ $product->id }}
-                jumlah = $('.jumlah').val()
-                total = {{ $product->harga }} * jumlah
-                is_checkout = 0
+                e.preventDefault(); // Mencegah default action jika user tidak login
+                
+                @if(Auth::guard('webmember')->check())
+                    id_member = {{ Auth::guard('webmember')->user()->id }};
+                    id_barang = {{ $product->id }};
+                    jumlah = $('.jumlah').val();
+                    total = {{ $product->harga }} * jumlah;
+                    is_checkout = 0;
 
-                $.ajax({
-                    url: '/add_to_cart',
-                    method: "POST",
-                    headers: {
-                        'X-CSRF-TOKEN': "{{ csrf_token() }}",
-                    },
-                    data: {
-                        id_member,
-                        id_barang,
-                        jumlah,
-                        total,
-                        is_checkout,
-                    },
-                    success: function(data) {
-                        window.location.href = '/cart'
-                    }
-                });
-            })
-        })
+                    $.ajax({
+                        url: '/add_to_cart',
+                        method: "POST",
+                        headers: {
+                            'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                        },
+                        data: {
+                            id_member,
+                            id_barang,
+                            jumlah,
+                            total,
+                            is_checkout,
+                        },
+                        success: function(data) {
+                            window.location.href = '/cart';
+                        }, 
+                        error: function(error) {
+                            window.location.href = '/login_member';
+                        }
+                    });
+                @else
+                    window.location.href = '/login_member'; // Redirect ke halaman login jika belum login
+                @endif
+            });
+        });
     </script>
 @endpush
